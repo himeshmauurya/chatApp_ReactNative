@@ -7,6 +7,7 @@ const {vidLink}=useRoute().params
   return (
     <View style={{flex:1}}>
       <Pdf
+      trustAllCerts={false}
                     source={{uri:vidLink}}
                     onLoadComplete={(numberOfPages,filePath) => {
                         console.log(`Number of pages: ${numberOfPages}`);

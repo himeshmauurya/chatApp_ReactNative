@@ -39,7 +39,6 @@ const App = () => {
           }}
           ref={ref}
           onProgress={x => {
-            console.log(x);
             setProgress(x);
           }}
           style={{width: '100%', height: fullScreen ? '100%' : 200}}
@@ -116,6 +115,7 @@ const App = () => {
                 style={{width: '80%', height: 40}}
                 minimumValue={0}
                 maximumValue={progress.seekableDuration}
+                value={progress.currentTime}
                 minimumTrackTintColor="#FFFFFF"
                 maximumTrackTintColor="#fff"
                 onValueChange={x => {

@@ -19,8 +19,8 @@ import storage from '@react-native-firebase/storage';
 import {check, PERMISSIONS, request, RESULTS} from 'react-native-permissions';
 import {Platform} from 'react-native';
 import RNFS from 'react-native-fs';
-
-
+import VidPreview from './VidPreview';
+import AudioShow from './AudioShow';
 const Chat = () => {
   const [messages, setMessages] = useState([]);
   const [isAttachImage, setIsAttachImage] = useState(false);
@@ -40,59 +40,6 @@ const Chat = () => {
     }
   }
 
-  useEffect(() => {
-    if (Platform.OS === 'android') {
-      check(
-        PERMISSIONS.ANDROID.WRITE_EXTERNAL_STORAGE &&
-          PERMISSIONS.ANDROID.READ_EXTERNAL_STORAGE,
-      )
-        .then(result => {
-          switch (result) {
-            case RESULTS.UNAVAILABLE:
-              console.log(
-                'This feature is not available (on this device / in this context)',
-              );
-              break;
-            case RESULTS.DENIED:
-              request(
-                PERMISSIONS.ANDROID.READ_EXTERNAL_STORAGE &&
-                  PERMISSIONS.ANDROID.WRITE_EXTERNAL_STORAGE,
-              ).then(result => {
-                console.log(result, 'result after asking permission');
-                if (result === 'granted' || Platform.Version >= 33) {
-                  console.log('Platform.Version>', Platform.Version);
-                } else if (result === 'blocked') {
-                  console.log(
-                    'Permission Denied: Some features need external storage access. Grant permission in device settings for full functionality.',
-                  );
-                }
-              });
-              console.log(
-                'The permission has not been requested / is denied but requestable',
-                result,
-              );
-              break;
-            case RESULTS.LIMITED:
-              console.log(
-                'The permission is limited: some actions are possible',
-              );
-              break;
-            case RESULTS.GRANTED:
-              console.log('The permission is granted');
-              break;
-            case RESULTS.BLOCKED:
-              console.log(
-                'The permission is denied and not requestable anymore',
-              );
-              break;
-          }
-        })
-        .catch(error => {
-          console.log('error occurred', error);
-        });
-    } else if (Platform.OS === 'ios') {
-    }
-  }, []);
   useEffect(fetchData, []);
 
   useEffect(() => {
@@ -123,7 +70,7 @@ const Chat = () => {
       setMessages(allmessages);
     });
 
-     return () => unsubscribe();
+    return () => unsubscribe();
   }
   const onSend = async () => {
     const myMsg = {
@@ -354,7 +301,7 @@ const Chat = () => {
     }
   };
 
-  function checkFileExist(fileName) {
+  function checkFileExist(fileName, downloadUrl, ext1) {
     const downloadsPath = RNFS.DownloadDirectoryPath;
     RNFS.readDir(downloadsPath)
       .then(result => {
@@ -369,20 +316,32 @@ const Chat = () => {
           } else if (ext[1] == 'mp4') {
             navigation.navigate('VideoShow', {vidLink: found.path});
           } else if (ext[1] == 'mp3') {
-            navigation.navigate('AudioShow', {vidLink: found.path});
+            // navigation.navigate('AudioShow', {vidLink: found.path});
           } else {
             notifyMessage(
               'file should be jpg,png,jpeg,pdf,mp4,mp3 format for preview',
             );
           }
         } else {
-          console.log('File does not exist in Downloads folder');
-          notifyMessage('File does not exist in Downloads folder');
+          if (ext1 == '.jpg' || ext1 == '.png' || ext1 == '.jpeg') {
+            navigation.navigate('ImageShow', {vidLink: downloadUrl});
+          } else if (ext1 == '.pdf') {
+            navigation.navigate('PdfShow', {vidLink: downloadUrl});
+          } else if (ext1 == '.mp4') {
+            navigation.navigate('VideoShow', {vidLink: downloadUrl});
+          } else if (ext1 == '.mp3') {
+            // navigation.navigate('AudioShow', {vidLink: downloadUrl});
+          } else {
+            notifyMessage(
+              'file should be jpg,png,jpeg,pdf,mp4,mp3 format for preview',
+            );
+          }
+          downloadResource(downloadUrl);
         }
       })
       .catch(error => {
         console.error('Error reading Downloads folder:', error);
-        notifyMessage('Error reading Downloads folder:');
+        notifyMessage('Error reading Downloads folder');
       });
   }
   return (
@@ -407,6 +366,11 @@ const Chat = () => {
         showsVerticalScrollIndicator={false}
         keyExtractor={(item, index) => index.toString()}
         renderItem={({item}) => {
+          const ext = item.downloadUrl
+            .slice(item.downloadUrl.lastIndexOf('.'))
+            .split('?')[0];
+          let videofind = '';
+         
           return (
             <View
               style={[
@@ -416,29 +380,52 @@ const Chat = () => {
                   : styles.receivedBubble,
               ]}>
               {item.downloadUrl.length > 10 ? (
-                <View style={{flexDirection: 'row'}}>
-                  <TouchableOpacity
-                    onPress={() => {
-                      downloadResource(item.downloadUrl);
-                    }}>
-                    <Text style={{color: 'black'}}>
-                      {new Date(item.createdAt).toLocaleString()}
-                    </Text>
-                    <Image
-                      source={require('../images/download.png')}
-                      style={styles.userIcon}
+                <View>
+                  {ext === '.jpg' || ext === '.png' || ext === '.jpeg' ? (
+                    <TouchableOpacity
+                      onPress={() => {
+                        checkFileExist(item.fileName, item.downloadUrl, ext);
+                      }}>
+                      <Image
+                        source={{uri: item.downloadUrl}}
+                        style={{height: 200, width: 200}}
+                      />
+                    </TouchableOpacity>
+                  ) : ext == '.pdf' ? (
+                    <TouchableOpacity
+                      onPress={() => {
+                        checkFileExist(item.fileName, item.downloadUrl, ext);
+                      }}>
+                      <Image
+                        source={require('../assets/pdf.png')}
+                        style={{height: 50, width: 50}}
+                      />
+                      <Text style={{color: 'black'}}>{item.fileName}</Text>
+                    </TouchableOpacity>
+                  ) : ext === '.mp4' ? (
+                    
+                    <TouchableOpacity
+                      onPress={() => {
+                        checkFileExist(item.fileName, item.downloadUrl, ext);
+                      }}>
+                      <VidPreview
+                        value={item.downloadUrl}
+                        fileName={item.fileName}
+                        videofind={videofind}
+                      />
+                    </TouchableOpacity>
+                  ) : ext == '.mp3' ? (
+                    <View style={{}}>
+                    <Text style={{color:'black'}}>{item.fileName}</Text>
+                    <AudioShow
+                      downloadUrl={item.downloadUrl}
+                      fileName={item.fileName}
+                      ext1={ext}
+                      downloadResource1={downloadResource}
                     />
-                    <Text style={{color: 'black'}}>{item.fileName}</Text>
-                  </TouchableOpacity>
-                  <TouchableOpacity
-                    onPress={() => {
-                      checkFileExist(item.fileName);
-                    }}>
-                    <Image
-                      source={require('../images/eye.png')}
-                      style={styles.userIconEye}
-                    />
-                  </TouchableOpacity>
+                    </View>
+                  ) : null}
+
                 </View>
               ) : (
                 <Text style={styles.messageText}>{item.text}</Text>
@@ -453,7 +440,6 @@ const Chat = () => {
           style={styles.input}
           value={mytext}
           onChangeText={txt => {
-            console.log(mytext);
             setMytext(txt);
           }}
         />

@@ -4,6 +4,7 @@ import {
   StyleSheet,
   TextInput,
   TouchableOpacity,
+  Alert
 } from 'react-native';
 import React, {useState} from 'react';
 import {useNavigation} from '@react-navigation/native';
@@ -31,7 +32,7 @@ const Login = () => {
       .catch(err => {
         setVisible(false)
         console.log(err);
-        Alert.alert('User not found')
+        Alert.alert('User not found',email)
       });
   };
 

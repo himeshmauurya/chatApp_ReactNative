@@ -32,7 +32,6 @@ const Users = () => {
           tempData.push(item.data());
         });
         setUsers(tempData);
-        //console.log(JSON.stringify(res.docs[0].data()))
       });
   };
   return (
