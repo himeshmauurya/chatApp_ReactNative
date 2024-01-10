@@ -9,7 +9,7 @@ import {useRoute} from '@react-navigation/native';
 
 const ImageShow = () => {
   const {vidLink} = useRoute().params;
-
+console.log("vidlink",vidLink)
   return (
     <>
       <Animated.Image

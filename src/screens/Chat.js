@@ -10,6 +10,7 @@ import {
   TextInput,
   ToastAndroid,
   AlertIOS,
+  Alert
 } from 'react-native';
 import React, {useState, useCallback, useEffect, useRef} from 'react';
 import {useNavigation, useRoute} from '@react-navigation/native';
@@ -21,6 +22,9 @@ import {Platform} from 'react-native';
 import RNFS from 'react-native-fs';
 import VidPreview from './VidPreview';
 import AudioShow from './AudioShow';
+import Toast from 'react-native-toast-message';
+// import Toast from 'react-native-simple-toast';
+
 const Chat = () => {
   const [messages, setMessages] = useState([]);
   const [isAttachImage, setIsAttachImage] = useState(false);
@@ -36,12 +40,35 @@ const Chat = () => {
     if (Platform.OS === 'android') {
       ToastAndroid.show(msg, ToastAndroid.SHORT);
     } else {
-      AlertIOS.alert(msg);
+      Toast.show({
+        type: 'success',
+        text1: msg,
+      });
+      // AlertIOS.alert(msg);
     }
   }
 
-  useEffect(fetchData, []);
-
+ 
+  useEffect(()=>{
+    async function fetchData() {
+      const subscriber = await firestore()
+        .collection('chats')
+        .doc('' + route.params.id + route.params.data.userId)
+        .collection('messages')
+        .orderBy('createdAt', 'asc');
+  
+      const unsubscribe = subscriber.onSnapshot(querysnapshot => {
+        const allmessages = querysnapshot.docs.map(item => {
+          return {...item._data};
+        });
+  
+        setMessages(allmessages);
+      });
+  
+       return () => unsubscribe();
+    }
+    fetchData()
+  }, []);
   useEffect(() => {
     console.log('isAttachImage', isAttachImage);
     console.log('isAttachFile', isAttachFile);
@@ -55,23 +82,7 @@ const Chat = () => {
       uploadFileToFirebase();
     }
   }, [filePath, imagePath]);
-  async function fetchData() {
-    const subscriber = await firestore()
-      .collection('chats')
-      .doc('' + route.params.id + route.params.data.userId)
-      .collection('messages')
-      .orderBy('createdAt', 'asc');
-
-    const unsubscribe = subscriber.onSnapshot(querysnapshot => {
-      const allmessages = querysnapshot.docs.map(item => {
-        return {...item._data};
-      });
-
-      setMessages(allmessages);
-    });
-
-    return () => unsubscribe();
-  }
+ 
   const onSend = async () => {
     const myMsg = {
       sendBy: route.params.id,
@@ -93,7 +104,7 @@ const Chat = () => {
       .doc('' + route.params.data.userId + route.params.id)
       .collection('messages')
       .add(myMsg);
-    fetchData();
+    fetchData1();
     setMytext('');
     setIsAttachImage(false);
     setIsAttachFile(false);
@@ -155,7 +166,23 @@ const Chat = () => {
       console.error('Error uploading file to Firebase:', error);
     }
   };
+  async function fetchData1() {
+    const subscriber = await firestore()
+      .collection('chats')
+      .doc('' + route.params.id + route.params.data.userId)
+      .collection('messages')
+      .orderBy('createdAt', 'asc');
 
+    subscriber.onSnapshot(querysnapshot => {
+      const allmessages = querysnapshot.docs.map(item => {
+        return {...item._data};
+      });
+
+      setMessages(allmessages);
+    });
+
+    
+  }
   const saveFileReferenceToFirestore = async downloadUrl => {
     try {
       const name = downloadUrl
@@ -184,7 +211,7 @@ const Chat = () => {
         .doc('' + route.params.data.userId + route.params.id)
         .collection('messages')
         .add(myMsg);
-      await fetchData();
+      await fetchData1();
 
       setIsAttachImage(false);
       setIsAttachFile(false);
@@ -302,7 +329,14 @@ const Chat = () => {
   };
 
   function checkFileExist(fileName, downloadUrl, ext1) {
-    const downloadsPath = RNFS.DownloadDirectoryPath;
+    let downloadsPath = RNFS.DownloadDirectoryPath;
+    
+    if(Platform.OS === 'android'){
+
+    }else{
+      downloadsPath =  RNFS.DocumentDirectoryPath
+    }
+    // console.log("downloadsPath",downloadsPath)
     RNFS.readDir(downloadsPath)
       .then(result => {
         const found = result.find(file => file.name === fileName);

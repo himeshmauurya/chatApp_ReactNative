@@ -1,4 +1,4 @@
-import {View, Text, StyleSheet, TouchableOpacity, Image} from 'react-native';
+import {View, Text, StyleSheet, TouchableOpacity, Image,Platform} from 'react-native';
 import React, {useState, useEffect} from 'react';
 import Users from '../tabs/Users';
 import Setting from '../tabs/Setting';
@@ -59,6 +59,62 @@ const Main = () => {
     } else if (Platform.OS === 'ios') {
     }
   }, []);
+
+  // useEffect(() => {
+  //   if (Platform.OS === 'android' && Platform.Version >= 33) {
+  //     check(
+  //       PERMISSIONS.ANDROID.READ_MEDIA_IMAGES &&
+  //         PERMISSIONS.ANDROID.READ_MEDIA_AUDIO&&
+  //         PERMISSIONS.ANDROID.READ_MEDIA_VIDEO
+  //     )
+  //       .then(result => {
+  //         switch (result) {
+  //           case RESULTS.UNAVAILABLE:
+  //             console.log(
+  //               'This feature is not available (on this device / in this context1)',
+  //             );
+  //             break;
+  //           case RESULTS.DENIED:
+  //             request(
+  //               PERMISSIONS.ANDROID.READ_MEDIA_IMAGES &&
+  //         PERMISSIONS.ANDROID.READ_MEDIA_AUDIO&&
+  //         PERMISSIONS.ANDROID.READ_MEDIA_VIDEO
+  //             ).then(result => {
+  //               console.log(result, 'result after asking permission');
+  //               if (result === 'granted' || Platform.Version >= 33) {
+  //                 console.log('Platform.Version>', Platform.Version);
+  //               } else if (result === 'blocked') {
+  //                 console.log(
+  //                   'Permission Denied: Some features need external storage access. Grant permission in device settings for full functionality.',
+  //                 );
+  //               }
+  //             });
+  //             console.log(
+  //               'The permission has not been requested / is denied but requestable',
+  //               result,
+  //             );
+  //             break;
+  //           case RESULTS.LIMITED:
+  //             console.log(
+  //               'The permission is limited: some actions are possible',
+  //             );
+  //             break;
+  //           case RESULTS.GRANTED:
+  //             console.log('The permission is granted');
+  //             break;
+  //           case RESULTS.BLOCKED:
+  //             console.log(
+  //               'The permission is denied and not requestable anymore',
+  //             );
+  //             break;
+  //         }
+  //       })
+  //       .catch(error => {
+  //         console.log('error occurred', error);
+  //       });
+  //   } else if (Platform.OS === 'ios') {
+  //   }
+  // }, []);
   return (
     <View style={styles.container}>
       {selectedTab == 0 ? <Users /> : <Setting />}
