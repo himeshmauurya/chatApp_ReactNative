@@ -15,6 +15,7 @@ import Video from 'react-native-video';
 import {useRoute} from '@react-navigation/native';
 import Slider from '@react-native-community/slider';
 import RNFS from 'react-native-fs';
+import Toast from 'react-native-toast-message';
 
 const AudioShow = props => {
   const [paused, setPaused] = useState(true);
@@ -27,7 +28,11 @@ const AudioShow = props => {
     if (Platform.OS === 'android') {
       ToastAndroid.show(msg, ToastAndroid.SHORT);
     } else {
-      AlertIOS.alert(msg);
+      // AlertIOS.alert(msg);
+      Toast.show({
+        type: 'success',
+        text1: msg,
+      });
     }
   }
   let currUrl = useRef(downloadUrl);
