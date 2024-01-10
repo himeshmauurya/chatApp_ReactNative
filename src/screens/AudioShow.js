@@ -40,8 +40,12 @@ const AudioShow = props => {
   };
 
   function checkFileExist(fileName, downloadUrl, ext1) {
-    const downloadsPath = RNFS.DownloadDirectoryPath;
+  let downloadsPath = RNFS.DownloadDirectoryPath;
+    if(Platform.OS === 'android'){
 
+    }else{
+      downloadsPath =  RNFS.DocumentDirectoryPath
+    }
     RNFS.readDir(downloadsPath)
       .then(result => {
         const found = result.find(file => file.name === fileName);
@@ -81,7 +85,6 @@ const AudioShow = props => {
           onEnd={() => setPaused(true)}
           // controls
           onProgress={x => {
-            console.log(x)
             setProgress(x);
           }}
         />
