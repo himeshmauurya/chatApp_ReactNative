@@ -62,19 +62,22 @@ const Users = () => {
 export default Users;
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
-    backgroundColor: 'white',
+    flexGrow: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#181046',
+    color:'white'
   },
   header: {
     width: '100%',
     height: 60,
-    backgroundColor: 'white',
+    backgroundColor: 'black',
     elevation: 5,
     justifyContent: 'center',
     alignItems: 'center',
   },
   title: {
-    color: 'purple',
+    color: 'white',
     fontSize: 20,
     fontWeight: '600',
   },
@@ -84,9 +87,10 @@ const styles = StyleSheet.create({
     marginTop: 20,
     flexDirection: 'row',
     height: 60,
-    borderWidth: 0.5,
+    borderWidth: 1,
     borderRadius: 10,
     paddingLeft: 20,
+    borderColor:'white',
     alignItems: 'center',
   },
   userIcon: {
@@ -94,7 +98,7 @@ const styles = StyleSheet.create({
     width: 40,
   },
   name: {
-    color: 'black',
+    color: 'white',
     marginLeft: 20,
     fontSize: 20,
   },
